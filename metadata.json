@@ -1,0 +1,5 @@
+{
+  "name": "AlgoDao: Institutional EA Architect",
+  "description": "A professional tool to design detailed prompts for creating MetaTrader 5 Expert Advisors (EAs). Configure strategies, indicators, and risk management, then generate a standardized coding prompt using Gemini 3.0 Pro.",
+  "requestFramePermissions": []
+}
