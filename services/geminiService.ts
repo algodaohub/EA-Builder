@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { EASettings, ChatMessage, GenerationResult, StrategyAnalysis } from '../types';
-import { apiKeyManager } from './apiKeyManager';
+import { apiKeyManager, ModelPreference } from './apiKeyManager';
 
 // --- HELPER: RETRY LOGIC WITH KEY ROTATION ---
 // This function wraps the AI call. If it fails with a quota error, 
@@ -90,9 +90,24 @@ const FEATURE_FLAGS_SCHEMA = {
   sessions: ["useAsianSession", "useLondonSession", "useNewYorkSession", "useSessionOffsets"]
 };
 
+// --- HELPER: GET MODEL BASED ON PREFERENCE ---
+function getTargetModel(taskType: 'fast' | 'complex'): string {
+  const pref = apiKeyManager.getModelPreference();
+  const customModel = apiKeyManager.getCustomModel();
+
+  if (pref === ModelPreference.CUSTOM) return customModel;
+  if (pref === ModelPreference.FLASH) return 'gemini-3-flash-preview';
+  if (pref === ModelPreference.PRO) return 'gemini-3.1-pro-preview';
+
+  // AUTO Logic
+  return taskType === 'complex' ? 'gemini-3.1-pro-preview' : 'gemini-3-flash-preview';
+}
+
 // 1. Analyze existing description
 export const analyzeStrategy = async (description: string): Promise<StrategyAnalysis> => {
   if (!description.trim()) return { settings: {}, reasoning: "" };
+  
+  const model = getTargetModel('fast');
 
   const systemInstruction = `
     Bạn là một Chuyên gia Phân tích Chiến thuật Định lượng (Quantitative Strategist) và Kiến trúc sư Hệ thống Giao dịch Tự động.
@@ -127,7 +142,7 @@ export const analyzeStrategy = async (description: string): Promise<StrategyAnal
   try {
     return await withGeminiRetry(async (ai) => {
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview', // 3.0 Flash for fast analysis
+        model: model,
         contents: `Phân tích chuyên sâu và cấu hình hệ thống cho mô tả sau:\n\n"${description}"`,
         config: {
           systemInstruction: systemInstruction,
@@ -198,10 +213,12 @@ export const consultStrategy = async (history: ChatMessage[], newMessage: string
     parts: [{ text: newMessage }]
   });
 
+  const model = getTargetModel('fast');
+
   try {
     return await withGeminiRetry(async (ai) => {
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview', // 3.0 Flash for chat
+        model: model,
         contents: contents,
         config: {
           systemInstruction: systemInstruction,
@@ -220,6 +237,7 @@ export const generateEAPrompt = async (settings: EASettings): Promise<Generation
   
   // Construct a detailed context for the model
   const promptContext = JSON.stringify(settings, null, 2);
+  const model = getTargetModel('fast'); // Prompt generation is fast enough for Flash
 
   const systemInstruction = `
     Bạn là một Giám đốc Chiến thuật (Chief Strategy Officer) tại một quỹ đầu cơ định lượng (Quant Hedge Fund).
@@ -242,7 +260,7 @@ export const generateEAPrompt = async (settings: EASettings): Promise<Generation
   try {
     return await withGeminiRetry(async (ai) => {
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview', // 3.0 Pro for High Quality Prompt
+        model: model, 
         contents: `Tạo Prompt & Review từ cấu hình sau:\n\n${promptContext}`,
         config: {
           systemInstruction: systemInstruction,
@@ -256,8 +274,7 @@ export const generateEAPrompt = async (settings: EASettings): Promise<Generation
               title: { type: Type.STRING, description: "Tên chiến thuật ngầu." }
             },
             required: ["prompt", "score", "analysis", "title"]
-          },
-          thinkingConfig: { thinkingBudget: 4096 } // Thinking Budget enabled for 3.0 Pro
+          }
         }
       });
 
@@ -279,6 +296,9 @@ export const generateEAPrompt = async (settings: EASettings): Promise<Generation
 
 // 4. Generate Code from Prompt
 export const generateMQL5Code = async (prompt: string): Promise<string> => {
+  const pref = apiKeyManager.getModelPreference();
+  const targetModel = getTargetModel('complex');
+  
   const systemInstruction = `
     You are a Senior Quantitative Developer and MQL5 Systems Engineer.
     
@@ -302,18 +322,49 @@ export const generateMQL5Code = async (prompt: string): Promise<string> => {
 
   try {
     return await withGeminiRetry(async (ai) => {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview', // 3.0 Pro for Complex Coding
-        contents: `Generate MQL5 Code for this specification:\n\n${prompt}`,
-        config: {
-          systemInstruction: systemInstruction,
-          thinkingConfig: { thinkingBudget: 16000 } // High budget for reasoning
-        }
-      });
+      // If user forced a specific model (Flash or Custom), use it directly
+      if (pref === ModelPreference.FLASH || pref === ModelPreference.CUSTOM) {
+        const response = await ai.models.generateContent({
+          model: targetModel,
+          contents: `Generate MQL5 Code for this specification:\n\n${prompt}`,
+          config: { 
+            systemInstruction: systemInstruction,
+            ...(targetModel.includes('pro') ? { thinkingConfig: { thinkingBudget: 16000 } } : {})
+          }
+        });
+        let code = response.text || "// Error generating code.";
+        code = code.replace(/```cpp/g, "").replace(/```mql5/g, "").replace(/```/g, "");
+        return code;
+      }
 
-      let code = response.text || "// Error generating code.";
-      code = code.replace(/```cpp/g, "").replace(/```mql5/g, "").replace(/```/g, "");
-      return code;
+      try {
+        // AUTO/PRO Logic: Try Pro first
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.1-pro-preview',
+          contents: `Generate MQL5 Code for this specification:\n\n${prompt}`,
+          config: {
+            systemInstruction: systemInstruction,
+            thinkingConfig: { thinkingBudget: 16000 }
+          }
+        });
+        let code = response.text || "// Error generating code.";
+        code = code.replace(/```cpp/g, "").replace(/```mql5/g, "").replace(/```/g, "");
+        return code;
+      } catch (proError: any) {
+        // Fallback to Flash if Pro fails (Quota) and user is on AUTO
+        if (pref === ModelPreference.AUTO && (proError?.message?.includes('429') || proError?.message?.includes('quota'))) {
+          console.warn("Pro quota hit, falling back to Flash for code generation...");
+          const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: `Generate MQL5 Code for this specification:\n\n${prompt}`,
+            config: { systemInstruction: systemInstruction }
+          });
+          let code = response.text || "// Error generating code.";
+          code = code.replace(/```cpp/g, "").replace(/```mql5/g, "").replace(/```/g, "");
+          return code;
+        }
+        throw proError;
+      }
     });
   } catch (error) {
     console.error("Code Generation Error:", error);
@@ -361,6 +412,7 @@ export const fixMQL5Code = async (code: string, errorLog: string): Promise<strin
 
 // 6. Simulate Logic (Logic Trace & Validation)
 export const simulateLogic = async (prompt: string, code: string, symbol: string): Promise<string> => {
+  const model = getTargetModel('complex');
   const systemInstruction = `
     Bạn là một Chuyên gia Kiểm toán Thuật toán (Quant Auditor) và Kỹ sư Đảm bảo Chất lượng (QA Engineer).
     
@@ -396,11 +448,11 @@ export const simulateLogic = async (prompt: string, code: string, symbol: string
   try {
     return await withGeminiRetry(async (ai) => {
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview', // 3.0 Pro for Logic Trace
+        model: model, 
         contents: `YÊU CẦU GỐC (PROMPT):\n${prompt}\n\nMÃ CẶP TIỀN: ${symbol}\n\nSOURCE CODE:\n${code}`,
         config: {
           systemInstruction: systemInstruction,
-          thinkingConfig: { thinkingBudget: 8192 }
+          ...(model.includes('pro') ? { thinkingConfig: { thinkingBudget: 8192 } } : {})
         }
       });
       return response.text || "Mô phỏng thất bại.";

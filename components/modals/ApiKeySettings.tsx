@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Key, AlertTriangle, CheckCircle, Zap } from 'lucide-react';
-import { apiKeyManager } from '../../services/apiKeyManager';
+import { X, Save, Key, AlertTriangle, CheckCircle, Zap, Cpu, Sparkles, Wand2, ChevronDown, ChevronUp } from 'lucide-react';
+import { apiKeyManager, ModelPreference, GEMINI_MODEL_GROUPS } from '../../services/apiKeyManager';
 
 interface Props {
   onClose: () => void;
@@ -9,11 +9,16 @@ interface Props {
 
 export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
   const [keyText, setKeyText] = useState('');
+  const [modelPref, setModelPref] = useState<ModelPreference>(ModelPreference.AUTO);
+  const [customModel, setCustomModel] = useState('');
   const [saved, setSaved] = useState(false);
   const [hasSystemKey, setHasSystemKey] = useState(false);
+  const [showCustomList, setShowCustomList] = useState(false);
 
   useEffect(() => {
     setKeyText(apiKeyManager.getRawText());
+    setModelPref(apiKeyManager.getModelPreference());
+    setCustomModel(apiKeyManager.getCustomModel());
     // Check if there's a system key (process.env.GEMINI_API_KEY)
     const allKeys = apiKeyManager.getAllKeys();
     const storedKeys = apiKeyManager.getRawText().split('\n').filter(k => k.trim().length > 0);
@@ -23,6 +28,8 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
   const handleSave = () => {
     const keys = keyText.split('\n').map(k => k.trim()).filter(k => k.length > 0);
     apiKeyManager.saveKeys(keys);
+    apiKeyManager.setModelPreference(modelPref);
+    apiKeyManager.setCustomModel(customModel);
     setSaved(true);
     setTimeout(() => {
         setSaved(false);
@@ -57,6 +64,92 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
                   <li>Nhấn nút <b>"Create API key"</b>.</li>
                   <li>Copy mã (bắt đầu bằng AIza...) và dán vào ô bên dưới.</li>
                 </ol>
+                <p className="mt-2 text-orange-400 font-bold">💡 Mẹo tránh lỗi Quota (429):</p>
+                <p>Bạn có thể tạo nhiều API Keys (từ các tài khoản Google khác nhau) và dán mỗi mã vào một dòng. Hệ thống sẽ tự động luân chuyển Key khi hết hạn mức.</p>
+             </div>
+          </div>
+
+          <div className="bg-slate-950/50 border border-slate-800 p-4 rounded-xl">
+             <label className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                <Cpu size={16} className="text-blue-400" /> Ưu tiên Mô hình (Model Preference)
+             </label>
+             <div className="grid grid-cols-1 gap-2">
+                <button 
+                  onClick={() => setModelPref(ModelPreference.AUTO)}
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${modelPref === ModelPreference.AUTO ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Sparkles size={18} className={modelPref === ModelPreference.AUTO ? 'text-blue-400' : 'text-slate-500'} />
+                    <div>
+                      <p className="text-xs font-bold">Tự động (Khuyên dùng)</p>
+                      <p className="text-[10px] opacity-70">Tối ưu giữa tốc độ và chất lượng code.</p>
+                    </div>
+                  </div>
+                  {modelPref === ModelPreference.AUTO && <CheckCircle size={14} className="text-blue-400" />}
+                </button>
+
+                <button 
+                  onClick={() => {
+                    setModelPref(ModelPreference.CUSTOM);
+                    setShowCustomList(!showCustomList);
+                  }}
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${modelPref === ModelPreference.CUSTOM ? 'bg-purple-600/10 border-purple-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Wand2 size={18} className={modelPref === ModelPreference.CUSTOM ? 'text-purple-400' : 'text-slate-500'} />
+                    <div>
+                      <p className="text-xs font-bold">Chọn Model cụ thể</p>
+                      <p className="text-[10px] opacity-70">
+                        {modelPref === ModelPreference.CUSTOM 
+                          ? `Đang chọn: ${customModel}` 
+                          : 'Tùy chọn mô hình theo danh sách Google.'}
+                      </p>
+                    </div>
+                  </div>
+                  {showCustomList ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {showCustomList && (
+                  <div className="mt-2 space-y-4 p-3 bg-slate-950 rounded-lg border border-slate-800 max-h-64 overflow-y-auto">
+                    {GEMINI_MODEL_GROUPS.map(group => (
+                      <div key={group.group}>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">{group.group}</p>
+                        <div className="space-y-1">
+                          {group.models.map(model => (
+                            <button
+                              key={model.id}
+                              onClick={() => {
+                                setCustomModel(model.id);
+                                setModelPref(ModelPreference.CUSTOM);
+                              }}
+                              className={`w-full text-left p-2 rounded-md transition-colors ${customModel === model.id ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-slate-800 text-slate-400'}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold">{model.name}</span>
+                                {customModel === model.id && <CheckCircle size={12} />}
+                              </div>
+                              <p className="text-[9px] opacity-60 leading-tight">{model.desc}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button 
+                  onClick={() => setModelPref(ModelPreference.FLASH)}
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${modelPref === ModelPreference.FLASH ? 'bg-emerald-600/10 border-emerald-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Zap size={18} className={modelPref === ModelPreference.FLASH ? 'text-emerald-400' : 'text-slate-500'} />
+                    <div>
+                      <p className="text-xs font-bold">Tiết kiệm (Flash Lite)</p>
+                      <p className="text-[10px] opacity-70">Dùng bản Lite để tiết kiệm Quota tối đa.</p>
+                    </div>
+                  </div>
+                  {modelPref === ModelPreference.FLASH && <CheckCircle size={14} className="text-emerald-400" />}
+                </button>
              </div>
           </div>
 

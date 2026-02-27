@@ -1,5 +1,31 @@
 
+export enum ModelPreference {
+  AUTO = 'auto',
+  FLASH = 'flash',
+  PRO = 'pro',
+  CUSTOM = 'custom'
+}
+
+export const GEMINI_MODEL_GROUPS = [
+  {
+    group: 'Gemini 3 Series (Mới nhất & Thông minh nhất)',
+    models: [
+      { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', desc: 'Đỉnh cao về lập trình và tư duy logic.' },
+      { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash', desc: 'Tốc độ cực nhanh, phản hồi tức thì.' }
+    ]
+  },
+  {
+    group: 'Gemini 2.5 Series (Hiệu năng cao)',
+    models: [
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: 'Ổn định, đa năng cho mọi tác vụ.' },
+      { id: 'gemini-2.5-flash-lite-latest', name: 'Gemini 2.5 Flash Lite', desc: 'Tiết kiệm tài nguyên, hạn mức cao.' }
+    ]
+  }
+];
+
 const STORAGE_KEY = 'gemini_api_keys';
+const MODEL_PREF_KEY = 'gemini_model_preference';
+const CUSTOM_MODEL_KEY = 'gemini_custom_model';
 const ENV_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
 
 // Parse keys from storage
@@ -62,5 +88,23 @@ export const apiKeyManager = {
   // Get raw text for textarea
   getRawText: (): string => {
     return getStoredKeys().join('\n');
+  },
+
+  // Model Preference
+  getModelPreference: (): ModelPreference => {
+    return (localStorage.getItem(MODEL_PREF_KEY) as ModelPreference) || ModelPreference.AUTO;
+  },
+
+  setModelPreference: (pref: ModelPreference) => {
+    localStorage.setItem(MODEL_PREF_KEY, pref);
+  },
+
+  // Custom Model Selection
+  getCustomModel: (): string => {
+    return localStorage.getItem(CUSTOM_MODEL_KEY) || 'gemini-3.1-pro-preview';
+  },
+
+  setCustomModel: (modelId: string) => {
+    localStorage.setItem(CUSTOM_MODEL_KEY, modelId);
   }
 };
