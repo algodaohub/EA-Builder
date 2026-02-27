@@ -1,9 +1,9 @@
 import React from 'react';
-import { Bot, Settings, Code, Zap, MessageSquareMore, Key, ExternalLink, Send, MessageCircle } from 'lucide-react';
+import { Bot, Settings, Code, Zap, MessageSquareMore, Key, ExternalLink, Send, MessageCircle, BookOpen, ShoppingCart } from 'lucide-react';
 
 interface SidebarProps {
-  activeTab: 'config' | 'result' | 'consult';
-  setActiveTab: (tab: 'config' | 'result' | 'consult') => void;
+  activeTab: 'config' | 'result' | 'consult' | 'guide' | 'library';
+  setActiveTab: (tab: 'config' | 'result' | 'consult' | 'guide' | 'library') => void;
   onOpenSettings?: () => void;
 }
 
@@ -25,6 +25,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpe
          </button>
          <button onClick={() => setActiveTab('result')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'result' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:bg-slate-800'}`}>
            <Code size={18} /> Prompt Đã Tạo
+         </button>
+         <div className="py-2 border-b border-slate-800/50 mb-2"></div>
+         <button onClick={() => setActiveTab('library')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'library' ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/50' : 'text-orange-400 hover:bg-slate-800'}`}>
+           <ShoppingCart size={18} /> Kho EA & Công cụ
+         </button>
+         <button onClick={() => setActiveTab('guide')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'guide' ? 'bg-slate-800 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'}`}>
+           <BookOpen size={18} /> Hướng dẫn A-Z
          </button>
       </nav>
 

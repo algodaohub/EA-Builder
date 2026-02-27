@@ -6,6 +6,8 @@ import { Sidebar } from './components/layout/Sidebar';
 import { ResultPanel } from './components/dashboard/ResultPanel';
 import { ConfigForm } from './components/dashboard/ConfigForm';
 import { ConsultantPanel } from './components/dashboard/ConsultantPanel';
+import { GuidePanel } from './components/dashboard/GuidePanel';
+import { LibraryPanel } from './components/dashboard/LibraryPanel';
 import { ApiKeySettings } from './components/modals/ApiKeySettings';
 
 const initialSettings: EASettings = {
@@ -205,7 +207,7 @@ const App: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisReasoning, setAnalysisReasoning] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<'config' | 'result' | 'consult'>('consult');
+  const [activeTab, setActiveTab] = useState<'config' | 'result' | 'consult' | 'guide' | 'library'>('consult');
   
   // Highlight state for newly added features
   const [highlightedKeys, setHighlightedKeys] = useState<Set<string>>(new Set());
@@ -396,6 +398,10 @@ const App: React.FC = () => {
               onDeleteSaved={handleDeleteSaved}
             />
           )}
+
+          {activeTab === 'guide' && <GuidePanel />}
+          
+          {activeTab === 'library' && <LibraryPanel />}
 
           {activeTab === 'consult' && (
             <ConsultantPanel 
