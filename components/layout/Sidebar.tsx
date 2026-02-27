@@ -40,11 +40,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpe
         {/* PR Section */}
         <div className="mb-6 p-4 bg-gradient-to-br from-emerald-900/40 to-slate-900 border border-emerald-500/30 rounded-xl shadow-lg">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-2">
-            <Zap size={14} className="fill-current" /> Ưu Đãi Hoàn Tiền
+            <Zap size={14} className="fill-current" /> Ưu Đãi Hoàn Tiền Giao Dịch
           </div>
-          <p className="text-[11px] text-white font-bold mb-3">
-            Hoàn tiền giao dịch lên đến <span className="text-emerald-400 text-lg font-black">95%</span>
-          </p>
           
           <div className="space-y-2 mb-4">
             <a 
@@ -89,6 +86,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpe
             >
               <Key size={14} className="text-yellow-500" /> Cấu hình API Keys
             </button>
+
+            <p className="text-[10px] text-slate-500 px-2">Yêu cầu. <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Lấy Key tại đây</a></p>
             
             {onOpenDonate && (
               <button 
@@ -98,8 +97,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpe
                 <Coffee size={14} /> Mua tôi Cốc Cafe
               </button>
             )}
-            
-            <p className="text-[10px] text-slate-500 px-2">Cần thiết để AI phân tích chiến thuật. <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Lấy Key tại đây</a></p>
           </div>
         )}
         <div className="text-xs text-slate-500 font-bold tracking-widest text-center py-2 bg-slate-900/50 rounded-lg border border-slate-800/50">

@@ -16,7 +16,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ onClose }) => {
   };
 
   // VietQR format for donation
-  const qrUrl = `https://img.vietqr.io/image/BIDV-96247ALGODAO-compact2.png?amount=${amount}&addInfo=Donate AlgoDao Architect&accountName=DAO MINH TAM`;
+  const qrUrl = `https://img.vietqr.io/image/BIDV-96247ALGODAO-compact2.png?amount=${amount}&addInfo=Donate AlgoDao Architect&accountName=LAI VAN DAO`;
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
@@ -33,7 +33,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ onClose }) => {
         <div className="p-5 flex flex-col items-center">
           <div className="w-full mb-4">
             <div className="grid grid-cols-3 gap-1.5 mb-3">
-              {['20000', '50000', '100000'].map((val) => (
+              {['50000', '100000', '500000'].map((val) => (
                 <button
                   key={val}
                   onClick={() => setAmount(val)}

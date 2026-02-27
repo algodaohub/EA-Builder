@@ -56,11 +56,10 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
              <AlertTriangle className="text-blue-400 shrink-0" size={24} />
              <div className="text-xs text-slate-300 leading-relaxed">
                 <p className="font-bold text-blue-300 mb-1 text-sm">Tại sao cần API Key?</p>
-                <p>Hệ thống sử dụng trí tuệ nhân tạo (Gemini AI) để phân tích chiến thuật của bạn. Để AI hoạt động, bạn cần cung cấp API Key cá nhân.</p>
+                <p>Đây là công cụ Miễn Phí 100%. Để AI hoạt động, bạn cần cung cấp API Key cá nhân.</p>
                 <p className="mt-2 font-bold text-yellow-400">Cách lấy Key miễn phí:</p>
                 <ol className="list-decimal ml-4 mt-1 space-y-1">
-                  <li>Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 underline font-bold">Google AI Studio</a></li>
-                  <li>Đăng nhập bằng tài khoản Google (Gmail).</li>
+                  <li>Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 underline font-bold">Google AI Studio</a> bằng tài khoản Google (Gmail)</li>
                   <li>Nhấn nút <b>"Create API key"</b>.</li>
                   <li>Copy mã (bắt đầu bằng AIza...) và dán vào ô bên dưới.</li>
                 </ol>
@@ -74,19 +73,6 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
                 <Cpu size={16} className="text-blue-400" /> Ưu tiên Mô hình (Model Preference)
              </label>
              <div className="grid grid-cols-1 gap-2">
-                <button 
-                  onClick={() => setModelPref(ModelPreference.AUTO)}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${modelPref === ModelPreference.AUTO ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Sparkles size={18} className={modelPref === ModelPreference.AUTO ? 'text-blue-400' : 'text-slate-500'} />
-                    <div>
-                      <p className="text-xs font-bold">Tự động (Khuyên dùng)</p>
-                      <p className="text-[10px] opacity-70">Tối ưu giữa tốc độ và chất lượng code.</p>
-                    </div>
-                  </div>
-                  {modelPref === ModelPreference.AUTO && <CheckCircle size={14} className="text-blue-400" />}
-                </button>
 
                 <button 
                   onClick={() => {
@@ -136,20 +122,6 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
                     ))}
                   </div>
                 )}
-
-                <button 
-                  onClick={() => setModelPref(ModelPreference.FLASH)}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${modelPref === ModelPreference.FLASH ? 'bg-emerald-600/10 border-emerald-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Zap size={18} className={modelPref === ModelPreference.FLASH ? 'text-emerald-400' : 'text-slate-500'} />
-                    <div>
-                      <p className="text-xs font-bold">Tiết kiệm (Flash Lite)</p>
-                      <p className="text-[10px] opacity-70">Dùng bản Lite để tiết kiệm Quota tối đa.</p>
-                    </div>
-                  </div>
-                  {modelPref === ModelPreference.FLASH && <CheckCircle size={14} className="text-emerald-400" />}
-                </button>
              </div>
           </div>
 
@@ -159,7 +131,7 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
                value={keyText}
                onChange={(e) => setKeyText(e.target.value)}
                placeholder="AIzaSy..."
-               className="w-full h-48 bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:border-yellow-500 focus:outline-none resize-none"
+               className="w-full h-24 bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:border-yellow-500 focus:outline-none resize-none"
              />
              <div className="flex justify-between mt-2 text-xs text-slate-500">
                 <div className="flex gap-3">
