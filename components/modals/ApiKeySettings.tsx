@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Key, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, Save, Key, AlertTriangle, CheckCircle, Zap } from 'lucide-react';
 import { apiKeyManager } from '../../services/apiKeyManager';
 
 interface Props {
@@ -10,9 +10,14 @@ interface Props {
 export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
   const [keyText, setKeyText] = useState('');
   const [saved, setSaved] = useState(false);
+  const [hasSystemKey, setHasSystemKey] = useState(false);
 
   useEffect(() => {
     setKeyText(apiKeyManager.getRawText());
+    // Check if there's a system key (process.env.GEMINI_API_KEY)
+    const allKeys = apiKeyManager.getAllKeys();
+    const storedKeys = apiKeyManager.getRawText().split('\n').filter(k => k.trim().length > 0);
+    setHasSystemKey(allKeys.length > storedKeys.length);
   }, []);
 
   const handleSave = () => {
@@ -64,7 +69,14 @@ export const ApiKeySettings: React.FC<Props> = ({ onClose }) => {
                className="w-full h-48 bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:border-yellow-500 focus:outline-none resize-none"
              />
              <div className="flex justify-between mt-2 text-xs text-slate-500">
-                <span>Total Keys: {keyText.split('\n').filter(k => k.trim().length > 0).length}</span>
+                <div className="flex gap-3">
+                  <span>Total Keys: {keyText.split('\n').filter(k => k.trim().length > 0).length}</span>
+                  {hasSystemKey && (
+                    <span className="text-emerald-400 flex items-center gap-1">
+                      <Zap size={10} fill="currentColor" /> System Key Active
+                    </span>
+                  )}
+                </div>
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">Get Keys Here</a>
              </div>
           </div>

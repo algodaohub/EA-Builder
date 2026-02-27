@@ -9,7 +9,7 @@ interface PaymentModalProps {
   onSuccess: () => void;
 }
 
-const ORDERS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1iVJ_kmdVdczW1RZAET1irpeag1S7dxMe81snB9BotUs/gviz/tq?tqx=out:csv&sheet=Orders';
+const ORDERS_SHEET_URL = import.meta.env.VITE_ORDERS_CHECK_URL || 'https://docs.google.com/spreadsheets/d/1iVJ_kmdVdczW1RZAET1irpeag1S7dxMe81snB9BotUs/gviz/tq?tqx=out:csv&sheet=Orders';
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({ eaName, productId, amount, onClose, onSuccess }) => {
   const [copied, setCopied] = React.useState(false);

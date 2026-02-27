@@ -1,6 +1,6 @@
 
 const STORAGE_KEY = 'gemini_api_keys';
-const ENV_KEY = process.env.API_KEY || '';
+const ENV_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
 
 // Parse keys from storage
 const getStoredKeys = (): string[] => {
@@ -25,6 +25,11 @@ export const apiKeyManager = {
     }
     // Filter out empty strings
     return keys.filter(k => k.trim().length > 0);
+  },
+
+  // Check if any keys exist at all (even if exhausted)
+  hasAnyKeys: (): boolean => {
+    return apiKeyManager.getAllKeys().length > 0;
   },
 
   // Save user keys

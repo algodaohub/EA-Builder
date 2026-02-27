@@ -16,7 +16,7 @@ interface EAItem {
   author: string;
 }
 
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1iVJ_kmdVdczW1RZAET1irpeag1S7dxMe81snB9BotUs/export?format=csv';
+const SHEET_URL = import.meta.env.VITE_ORDERS_SHEET_URL || 'https://docs.google.com/spreadsheets/d/1iVJ_kmdVdczW1RZAET1irpeag1S7dxMe81snB9BotUs/export?format=csv';
 
 export const LibraryPanel: React.FC = () => {
   const [items, setItems] = useState<EAItem[]>([]);

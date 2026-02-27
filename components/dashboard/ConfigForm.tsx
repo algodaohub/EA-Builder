@@ -23,38 +23,6 @@ interface ConfigFormProps {
   analysisReasoning?: string;
 }
 
-const PRESETS = [
-  { 
-    name: 'Scalper', 
-    icon: Zap,
-    settings: {
-      tradingMethod: 'Scalping (Lướt sóng)',
-      sltp: { useStopLoss: true, useTakeProfit: true, useVirtual: true },
-      stealth: { useRandomDelay: true, useSlippageControl: true },
-      volatility: { useMaxCandleSize: true, useAvgSpread: true }
-    }
-  },
-  { 
-    name: 'Grid/DCA', 
-    icon: Layers,
-    settings: {
-      tradingMethod: 'Grid (Lưới giá)',
-      grid: { enabled: true, useMaxOrders: true, useDistance: true, useLotMultiplier: true },
-      protection: { useMaxDrawdown: true, useEquityStop: true },
-      advGrid: { useSmartGrid: true }
-    }
-  },
-  { 
-    name: 'Prop Firm', 
-    icon: Briefcase,
-    settings: {
-      protection: { useDailyLoss: true, useMaxDrawdown: true },
-      propFirm: { useDailyLossReset: true, useHardNewsBlock: true, useConsistency: true },
-      time: { useNewsFilter: true }
-    }
-  }
-];
-
 export const ConfigForm: React.FC<ConfigFormProps> = ({ 
   settings, 
   setSettings, 
@@ -201,21 +169,6 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
         isAnalyzing={isAnalyzing}
         reasoning={analysisReasoning}
       />
-
-      {/* Quick Presets */}
-      <div className="flex flex-wrap gap-2 mb-2">
-        <span className="text-xs text-slate-500 w-full mb-1 ml-1">Cấu hình nhanh (Presets):</span>
-        {PRESETS.map(preset => (
-          <button
-            key={preset.name}
-            onClick={() => applyPreset(preset.settings)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-300 transition-colors"
-          >
-            <preset.icon size={14} className="text-blue-400" />
-            {preset.name}
-          </button>
-        ))}
-      </div>
 
       {/* 1. General & System (Custom Layout) */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
@@ -416,46 +369,44 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
         ]}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BooleanSection 
-          title="8. Bảo vệ Tài khoản" 
-          icon={ShieldCheck} 
-          isOpen={openSections['prot']} 
-          onToggle={() => toggleSection('prot')}
-          data={settings.protection}
-          onUpdate={(key, val) => updateNested('protection', key as keyof EASettings['protection'], val)}
-          highlightedKeys={highlightedKeys}
-          items={[
-            { key: 'useDailyLoss', label: 'Max Daily Loss', description: '% Lỗ tối đa ngày' },
-            { key: 'useMaxDrawdown', label: 'Max Drawdown', description: '% Sụt giảm tổng' },
-            { key: 'useTargetProfit', label: 'Target Profit', description: '% Lãi mục tiêu' },
-            { key: 'useEquityStop', label: 'Equity Stop', description: 'Dừng khi vốn < X' },
-            { key: 'useEquityTrailing', label: 'Equity Trailing', description: 'Dời lỗ cho toàn tài khoản' }
-          ]}
-        />
-        <BooleanSection 
-          title="9. Hiển thị & Nâng cao" 
-          icon={BarChart2} 
-          isOpen={openSections['adv']} 
-          onToggle={() => toggleSection('adv')}
-          data={{ ...settings.display, ...settings.advanced }}
-          onUpdate={(key, val) => {
-             // Handle merged state for display (hacky but works for UI grouping)
-             if (key in settings.display) updateNested('display', key as keyof EASettings['display'], val);
-             else updateNested('advanced', key as keyof EASettings['advanced'], val);
-          }}
-          highlightedKeys={highlightedKeys}
-          items={[
-             // Display
-            { key: 'usePanel' as any, label: 'On-Chart Panel' },
-            { key: 'usePush' as any, label: 'Push Notifications' },
-             // Advanced
-            { key: 'useRecovery' as any, label: 'Recovery Mode' },
-            { key: 'usePartialClose' as any, label: 'Partial Close' },
-            { key: 'useOneChart' as any, label: 'One Chart Setup', description: 'Multi-currency' }
-          ]}
-        />
-      </div>
+      <BooleanSection 
+        title="8. Bảo vệ Tài khoản" 
+        icon={ShieldCheck} 
+        isOpen={openSections['prot']} 
+        onToggle={() => toggleSection('prot')}
+        data={settings.protection}
+        onUpdate={(key, val) => updateNested('protection', key as keyof EASettings['protection'], val)}
+        highlightedKeys={highlightedKeys}
+        items={[
+          { key: 'useDailyLoss', label: 'Max Daily Loss', description: '% Lỗ tối đa ngày' },
+          { key: 'useMaxDrawdown', label: 'Max Drawdown', description: '% Sụt giảm tổng' },
+          { key: 'useTargetProfit', label: 'Target Profit', description: '% Lãi mục tiêu' },
+          { key: 'useEquityStop', label: 'Equity Stop', description: 'Dừng khi vốn < X' },
+          { key: 'useEquityTrailing', label: 'Equity Trailing', description: 'Dời lỗ cho toàn tài khoản' }
+        ]}
+      />
+      <BooleanSection 
+        title="9. Hiển thị & Nâng cao" 
+        icon={BarChart2} 
+        isOpen={openSections['adv']} 
+        onToggle={() => toggleSection('adv')}
+        data={{ ...settings.display, ...settings.advanced }}
+        onUpdate={(key, val) => {
+           // Handle merged state for display (hacky but works for UI grouping)
+           if (key in settings.display) updateNested('display', key as keyof EASettings['display'], val);
+           else updateNested('advanced', key as keyof EASettings['advanced'], val);
+        }}
+        highlightedKeys={highlightedKeys}
+        items={[
+           // Display
+          { key: 'usePanel' as any, label: 'On-Chart Panel' },
+          { key: 'usePush' as any, label: 'Push Notifications' },
+           // Advanced
+          { key: 'useRecovery' as any, label: 'Recovery Mode' },
+          { key: 'usePartialClose' as any, label: 'Partial Close' },
+          { key: 'useOneChart' as any, label: 'One Chart Setup', description: 'Multi-currency' }
+        ]}
+      />
 
       <BooleanSection 
         title="11. Stealth & Ngụy trang" 

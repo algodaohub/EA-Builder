@@ -10,6 +10,10 @@ async function withGeminiRetry<T>(
 ): Promise<T> {
   let lastError: any = null;
 
+  if (!apiKeyManager.hasAnyKeys()) {
+    throw new Error("Chưa có API Key. Vui lòng vào 'Cấu hình API Keys' để nhập Key từ Google AI Studio.");
+  }
+
   // We loop as long as there is a valid key available
   while (apiKeyManager.hasAvailableKeys()) {
     const currentKey = apiKeyManager.getActiveKey();
@@ -50,7 +54,7 @@ async function withGeminiRetry<T>(
   }
 
   // If we ran out of keys or loops
-  throw lastError || new Error("No valid API keys available or all quotas exceeded.");
+  throw lastError || new Error("Tất cả API Keys đều đã hết hạn mức (Quota Exceeded). Vui lòng thêm Key mới hoặc đợi 1 phút để reset.");
 }
 
 

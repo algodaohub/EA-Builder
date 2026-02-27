@@ -9,6 +9,7 @@ import { ConsultantPanel } from './components/dashboard/ConsultantPanel';
 import { GuidePanel } from './components/dashboard/GuidePanel';
 import { LibraryPanel } from './components/dashboard/LibraryPanel';
 import { ApiKeySettings } from './components/modals/ApiKeySettings';
+import { DonateModal } from './components/modals/DonateModal';
 
 const initialSettings: EASettings = {
   name: "TrendMaster_Pro_V1",
@@ -207,7 +208,7 @@ const App: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisReasoning, setAnalysisReasoning] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<'config' | 'result' | 'consult' | 'guide' | 'library'>('consult');
+  const [activeTab, setActiveTab] = useState<'config' | 'result' | 'consult' | 'guide' | 'library'>('config');
   
   // Highlight state for newly added features
   const [highlightedKeys, setHighlightedKeys] = useState<Set<string>>(new Set());
@@ -218,6 +219,7 @@ const App: React.FC = () => {
 
   // Settings Modal State
   const [showSettings, setShowSettings] = useState(false);
+  const [showDonateModal, setShowDonateModal] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<SavedPrompt[]>([]);
 
   // Load saved prompts on mount
@@ -366,10 +368,13 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row font-inter">
       {showSettings && <ApiKeySettings onClose={() => setShowSettings(false)} />}
       
+      {showDonateModal && <DonateModal onClose={() => setShowDonateModal(false)} />}
+      
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         onOpenSettings={() => setShowSettings(true)}
+        onOpenDonate={() => setShowDonateModal(true)}
       />
 
       <div className="flex-1 p-4 md:p-8 overflow-y-auto h-screen scroll-smooth">

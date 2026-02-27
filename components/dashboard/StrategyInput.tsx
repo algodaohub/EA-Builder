@@ -69,21 +69,6 @@ export const StrategyInput: React.FC<StrategyInputProps> = ({ value, onChange, o
           </p>
         </div>
       )}
-
-      {/* Quick Tips */}
-      {!value && (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {['Đánh Vàng M5', 'Martingale', 'Tránh tin tức', 'Phiên Âu'].map(tip => (
-            <button 
-              key={tip}
-              onClick={() => onChange(tip)}
-              className="text-[10px] text-left px-2 py-1 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 rounded text-slate-400 transition-colors"
-            >
-              + {tip}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 };
