@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { EASettings, TradeDirection, TradingMethod, ChatMessage, GenerationResult, SavedPrompt } from './types';
 import { generateEAPrompt, analyzeStrategy, consultStrategy } from './services/geminiService';
 import { storageService } from './services/storageService';
@@ -418,6 +419,7 @@ const App: React.FC = () => {
           )}
         </div>
       </div>
+      <Analytics />
     </div>
   );
 };
